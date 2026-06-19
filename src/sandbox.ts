@@ -26,6 +26,7 @@ export function buildSandbox(opts: {
   const sName = sandboxName(opts.name);
   return Sandbox.builder(sName)
     .image(opts.image)
+    .pullPolicy("always")
     .cpus(opts.cpus)
     .memory(opts.memory)
     .env("ANTHROPIC_API_KEY", opts.apiKey)
