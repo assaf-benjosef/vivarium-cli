@@ -1,5 +1,7 @@
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { createInterface } from "node:readline/promises";
+import { stdin, stdout } from "node:process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -31,6 +33,14 @@ export async function upgrade(): Promise<void> {
 
   if (current === latest) {
     console.log("Already on the latest version.");
+    return;
+  }
+
+  const rl = createInterface({ input: stdin, output: stdout });
+  const answer = await rl.question(`Upgrade to ${latest}? [Y/n] `);
+  rl.close();
+  if (answer && answer.toLowerCase() !== "y") {
+    console.log("Cancelled.");
     return;
   }
 
