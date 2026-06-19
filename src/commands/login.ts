@@ -23,7 +23,7 @@ export async function login(opts: { hubUrl?: string }): Promise<void> {
     const server = createServer((req, res) => {
       const url = new URL(req.url!, `http://localhost`);
 
-      if (url.pathname !== "/callback") {
+      if (url.pathname.replace(/\/$/, "") !== "/callback") {
         res.writeHead(404);
         res.end();
         return;
