@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import { program } from "commander";
 import { start } from "./commands/start.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(resolve(__dirname, "../package.json"), "utf-8"));
 import { stop } from "./commands/stop.js";
 import { list } from "./commands/list.js";
 import { logs } from "./commands/logs.js";
@@ -18,7 +24,7 @@ import { configCmd } from "./commands/config.js";
 program
   .name("viv")
   .description("Manage Vivarium sandboxes")
-  .version("0.1.0");
+  .version(pkg.version);
 
 program
   .command("start")

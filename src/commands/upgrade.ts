@@ -1,12 +1,40 @@
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 
 const PKG = "@vivarium-run/cli";
 
-export async function upgrade(): Promise<void> {
-  const current = process.env.npm_package_version ?? getInstalledVersion();
-  console.log(`Current version: ${current}`);
-  console.log("Checking for updates...");
+function getInstalledVersion(): string {
+  try {
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const pkg = JSON.parse(readFileSync(resolve(dir, "../../package.json"), "utf-8"));
+    return pkg.version;
+  } catch {
+    return "unknown";
+  }
+}
 
+function getLatestVersion(): string {
+  try {
+    return execSync(`npm view ${PKG} version`, { encoding: "utf-8" }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+export async function upgrade(): Promise<void> {
+  const current = getInstalledVersion();
+  const latest = getLatestVersion();
+  console.log(`Current: ${current}`);
+  console.log(`Latest:  ${latest}`);
+
+  if (current === latest) {
+    console.log("Already on the latest version.");
+    return;
+  }
+
+  console.log("Upgrading...");
   try {
     execSync(`npm install -g ${PKG}@latest`, { stdio: "inherit" });
   } catch {
@@ -14,18 +42,5 @@ export async function upgrade(): Promise<void> {
     process.exit(1);
   }
 
-  const updated = getInstalledVersion();
-  if (updated === current) {
-    console.log("Already on the latest version.");
-  } else {
-    console.log(`✓ Updated to ${updated}`);
-  }
-}
-
-function getInstalledVersion(): string {
-  try {
-    return execSync(`npm view ${PKG} version`, { encoding: "utf-8" }).trim();
-  } catch {
-    return "unknown";
-  }
+  console.log(`✓ Updated from ${current} to ${latest}`);
 }
