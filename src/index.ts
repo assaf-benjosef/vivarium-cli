@@ -17,7 +17,7 @@ program
 
 program
   .command("start")
-  .description("Create and start a new vivarium sandbox")
+  .description("Create and start a new vivarium, or resume a stopped one")
   .option("--name <name>", "Vivarium name")
   .option("--token <token>", "Hub authentication token")
   .option("--hub-url <url>", "Hub WebSocket URL", "wss://app.vivarium.run/ws")
@@ -65,7 +65,7 @@ program
 program
   .command("remove [name]")
   .alias("rm")
-  .description("Stop and delete a vivarium sandbox and its volume")
+  .description("Stop and delete a vivarium sandbox, volume, and system service")
   .option("-f, --force", "Skip confirmation")
   .action(remove);
 

@@ -16,7 +16,7 @@ Requires Node.js 22+ and macOS (Apple Silicon) or Linux with KVM.
 viv start --name my-app --token <HUB_TOKEN>
 ```
 
-This pulls the vivarium Docker image, boots a microVM, and starts the agent. The agent connects to the hub and is ready to receive messages.
+This pulls the vivarium OCI image, boots a microVM, and starts the agent. The agent connects to the hub and is ready to receive messages.
 
 ## Commands
 

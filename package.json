@@ -18,6 +18,13 @@
     "ai",
     "agent"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/assaf-benjosef/vivarium-cli.git"
+  },
+  "files": [
+    "dist"
+  ],
   "author": "Assaf Ben Josef",
   "license": "MIT",
   "dependencies": {
