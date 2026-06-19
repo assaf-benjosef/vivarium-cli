@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
@@ -44,13 +44,15 @@ export async function upgrade(): Promise<void> {
     return;
   }
 
-  console.log("Upgrading...");
   try {
-    execSync(`npm install -g ${PKG}@latest`, { stdio: "inherit" });
+    execFileSync("npm", ["install", "-g", `${PKG}@latest`], {
+      stdio: "inherit",
+      env: { ...process.env, npm_config_loglevel: "warn" },
+    });
   } catch {
     console.error("Update failed. You may need to run with sudo.");
     process.exit(1);
   }
 
-  console.log(`✓ Updated from ${current} to ${latest}`);
+  console.log(`✓ Run 'viv -V' to confirm the update.`);
 }
