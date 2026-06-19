@@ -1,5 +1,7 @@
 import { Sandbox } from "microsandbox";
-import { findDefaultVivarium, sandboxName, startAgent } from "../sandbox.js";
+import { buildSandbox, findDefaultVivarium, sandboxName, startAgent } from "../sandbox.js";
+import { loadConfig } from "../config.js";
+import { registerVivarium } from "../hub-client.js";
 
 export async function reimage(
   name: string | undefined,
@@ -20,45 +22,61 @@ export async function reimage(
     process.exit(1);
   }
 
-  const config = handle.config();
+  const oldConfig = handle.config();
+
+  // Resolve credentials before touching the sandbox
+  const config = loadConfig();
+  const apiKey = process.env.ANTHROPIC_API_KEY ?? config.apiKey;
+  if (!apiKey) {
+    console.error("API key required. Set ANTHROPIC_API_KEY or run `viv config set api-key <key>`.");
+    process.exit(1);
+  }
+
+  let token: string | undefined;
+  let hubUrl = "wss://app.vivarium.run/ws";
+
+  if (config.userToken) {
+    const hubBase = config.hubUrl ?? "https://app.vivarium.run";
+    try {
+      const result = await registerVivarium(config.userToken, target, hubBase);
+      token = result.token;
+      hubUrl = result.hubUrl;
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : "Failed to register with hub.");
+      process.exit(1);
+    }
+  }
+
+  if (!token) {
+    console.error("Hub token required. Run `viv login` first.");
+    process.exit(1);
+  }
+
+  const port = (oldConfig as Record<string, unknown>).network as { ports?: Array<{ host: number; guest: number }> } | undefined;
+  const hostPort = port?.ports?.[0]?.host ?? 3000;
 
   console.log(`Upgrading vivarium "${target}"...`);
 
-  // Stop if running
   if (handle.status === "running") {
     console.log("  Stopping...");
     await handle.stop();
   }
 
-  // Remove old sandbox (keeps the volume)
   console.log("  Removing old sandbox...");
   await Sandbox.remove(sName);
 
-  // Recreate with new image but same config
   console.log(`  Creating with ${opts.image}...`);
-  const builder = Sandbox.builder(sName)
-    .image(opts.image)
-    .cpus((config as Record<string, unknown>).cpus as number ?? 2)
-    .memory((config as Record<string, unknown>).memory as number ?? 2048)
-    .volume("/workspace", (v) => v.namedWith(sName, "ensure-exists"))
-    .label("vivarium", "true")
-    .detached(true);
 
-  // Re-apply env vars from old config
-  const envs = (config as Record<string, unknown>).envs as Record<string, string> | undefined;
-  if (envs) {
-    for (const [key, value] of Object.entries(envs)) {
-      builder.env(key, value);
-    }
-  }
-
-  // Re-apply port mapping
-  const ports = (config as Record<string, unknown>).ports as Array<{ host: number; guest: number }> | undefined;
-  if (ports) {
-    for (const p of ports) {
-      builder.port(p.host, p.guest);
-    }
-  }
+  const builder = buildSandbox({
+    name: target,
+    image: opts.image,
+    apiKey,
+    hubUrl,
+    token,
+    port: hostPort,
+    cpus: (oldConfig as Record<string, unknown>).cpus as number ?? 2,
+    memory: (oldConfig as Record<string, unknown>).memoryMib as number ?? 2048,
+  });
 
   const progress = await builder.createWithPullProgress();
   for await (const event of progress) {
