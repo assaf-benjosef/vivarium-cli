@@ -1,6 +1,6 @@
 {
   "name": "@vivarium-run/cli",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "CLI for managing Vivarium sandboxes",
   "type": "module",
   "bin": {
