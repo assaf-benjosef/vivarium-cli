@@ -13,6 +13,7 @@ import { login } from "./commands/login.js";
 import { logout } from "./commands/logout.js";
 import { whoami } from "./commands/whoami.js";
 import { configCmd } from "./commands/config.js";
+import { selfUpdate } from "./commands/self-update.js";
 
 program
   .name("viv")
@@ -97,5 +98,10 @@ configCommand.addHelpText(
   "after",
   "\nSubcommands:\n  list              Show current config\n  get <key>         Get a config value\n  set <key> <value> Set a config value (api-key, hub-url)\n  path              Print config file path",
 );
+
+program
+  .command("update")
+  .description("Update the viv CLI to the latest version")
+  .action(selfUpdate);
 
 program.parse();
