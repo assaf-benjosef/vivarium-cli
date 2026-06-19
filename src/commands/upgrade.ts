@@ -1,5 +1,5 @@
 import { Sandbox } from "microsandbox";
-import { findDefaultVivarium, sandboxName } from "../sandbox.js";
+import { findDefaultVivarium, sandboxName, startAgent } from "../sandbox.js";
 
 export async function upgrade(
   name: string | undefined,
@@ -27,8 +27,7 @@ export async function upgrade(
   // Stop if running
   if (handle.status === "running") {
     console.log("  Stopping...");
-    const sandbox = await Sandbox.startDetached(sName);
-    await sandbox.stop();
+    await handle.stop();
   }
 
   // Remove old sandbox (keeps the volume)
@@ -69,6 +68,7 @@ export async function upgrade(
   }
   process.stdout.write("\r" + " ".repeat(60) + "\r");
 
-  await progress.awaitSandbox();
+  const sandbox = await progress.awaitSandbox();
+  await startAgent(sandbox);
   console.log(`✓ Vivarium "${target}" upgraded and running.`);
 }

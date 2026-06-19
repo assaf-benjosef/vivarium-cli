@@ -23,7 +23,7 @@ program
   .option("--hub-url <url>", "Hub WebSocket URL", "wss://app.vivarium.run/ws")
   .option("--api-key <key>", "Anthropic API key")
   .option("--port <port>", "Host port to expose (default: auto-assign 3000-3099)")
-  .option("--image <image>", "Docker image", "ghcr.io/assaf-benjosef/vivarium:latest")
+  .option("--image <image>", "OCI image", "ghcr.io/assaf-benjosef/vivarium:latest")
   .option("--cpus <n>", "CPU cores", "2")
   .option("--memory <mib>", "Memory in MiB", "2048")
   .option("--no-service", "Don't install system service for auto-restart")
@@ -59,7 +59,7 @@ program
 program
   .command("upgrade [name]")
   .description("Pull latest image and recreate sandbox")
-  .option("--image <image>", "Docker image", "ghcr.io/assaf-benjosef/vivarium:latest")
+  .option("--image <image>", "OCI image", "ghcr.io/assaf-benjosef/vivarium:latest")
   .action(upgrade);
 
 program

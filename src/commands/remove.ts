@@ -33,8 +33,7 @@ export async function remove(
     const handle = await Sandbox.get(sName);
     if (handle.status === "running") {
       console.log("  Stopping...");
-      const sandbox = await Sandbox.startDetached(sName);
-      await sandbox.stop();
+      await handle.stop();
     }
   } catch {}
 

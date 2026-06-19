@@ -8,18 +8,19 @@ export async function stop(name?: string): Promise<void> {
     process.exit(1);
   }
 
+  let handle;
   try {
-    const handle = await Sandbox.get(sandboxName(target));
-    if (handle.status !== "running") {
-      console.log(`Vivarium "${target}" is already stopped.`);
-      return;
-    }
+    handle = await Sandbox.get(sandboxName(target));
   } catch {
     console.error(`Vivarium "${target}" not found.`);
     process.exit(1);
   }
 
-  const sandbox = await Sandbox.startDetached(sandboxName(target));
-  await sandbox.stop();
+  if (handle.status !== "running") {
+    console.log(`Vivarium "${target}" is already stopped.`);
+    return;
+  }
+
+  await handle.stop();
   console.log(`✓ Vivarium "${target}" stopped.`);
 }

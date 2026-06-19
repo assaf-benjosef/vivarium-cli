@@ -8,14 +8,20 @@ export async function shell(name?: string): Promise<void> {
     process.exit(1);
   }
 
-  let sandbox;
+  let handle;
   try {
-    sandbox = await Sandbox.startDetached(sandboxName(target));
+    handle = await Sandbox.get(sandboxName(target));
   } catch {
-    console.error(`Vivarium "${target}" not found or not running.`);
+    console.error(`Vivarium "${target}" not found.`);
     process.exit(1);
   }
 
+  if (handle.status !== "running") {
+    console.error(`Vivarium "${target}" is not running.`);
+    process.exit(1);
+  }
+
+  const sandbox = await handle.connect();
   const exitCode = await sandbox.attachShell();
   process.exit(exitCode);
 }
