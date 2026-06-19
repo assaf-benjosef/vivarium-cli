@@ -20,6 +20,7 @@ import { login } from "./commands/login.js";
 import { logout } from "./commands/logout.js";
 import { whoami } from "./commands/whoami.js";
 import { configCmd } from "./commands/config.js";
+import { fleet } from "./commands/fleet.js";
 
 program
   .name("viv")
@@ -103,6 +104,15 @@ const configCommand = program
 configCommand.addHelpText(
   "after",
   "\nSubcommands:\n  list              Show current config\n  get <key>         Get a config value\n  set <key> <value> Set a config value (api-key, hub-url)\n  path              Print config file path",
+);
+
+const fleetCommand = program
+  .command("fleet [subcommand] [name]")
+  .description("Manage vivariums across all hosts")
+  .action((sub: string | undefined, name: string | undefined) => fleet(sub, name));
+fleetCommand.addHelpText(
+  "after",
+  "\nSubcommands:\n  list              List all your vivariums (default)\n  status <name>     Show live status of a vivarium",
 );
 
 program

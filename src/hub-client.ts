@@ -47,6 +47,45 @@ export async function getMe(
   return res.json() as Promise<HubUser>;
 }
 
+export interface FleetVivarium {
+  id: number;
+  name: string;
+  version: string | null;
+  online: boolean;
+  connectedAt: string | null;
+  createdAt: string;
+}
+
+export interface VivariumStatus {
+  appRunning: boolean;
+  uptime: number;
+  totalCostUsd?: number;
+  inputTokens?: number;
+}
+
+export async function getFleet(
+  token: string,
+  hubUrl?: string,
+): Promise<FleetVivarium[]> {
+  const res = await hubFetch("/api/fleet", token, hubUrl);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch fleet: ${res.status}`);
+  }
+  return res.json() as Promise<FleetVivarium[]>;
+}
+
+export async function getFleetStatus(
+  token: string,
+  vivariumId: number,
+  hubUrl?: string,
+): Promise<VivariumStatus> {
+  const res = await hubFetch(`/api/fleet/${vivariumId}/status`, token, hubUrl);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch status: ${res.status}`);
+  }
+  return res.json() as Promise<VivariumStatus>;
+}
+
 export async function registerVivarium(
   token: string,
   name: string,
