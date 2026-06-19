@@ -9,6 +9,10 @@ import { shell } from "./commands/shell.js";
 import { status } from "./commands/status.js";
 import { upgrade } from "./commands/upgrade.js";
 import { remove } from "./commands/remove.js";
+import { login } from "./commands/login.js";
+import { logout } from "./commands/logout.js";
+import { whoami } from "./commands/whoami.js";
+import { configCmd } from "./commands/config.js";
 
 program
   .name("viv")
@@ -68,5 +72,30 @@ program
   .description("Stop and delete a vivarium sandbox, volume, and system service")
   .option("-f, --force", "Skip confirmation")
   .action(remove);
+
+program
+  .command("login")
+  .description("Log in to Vivarium Hub via Google OAuth")
+  .option("--hub-url <url>", "Hub base URL", "https://app.vivarium.run")
+  .action(login);
+
+program
+  .command("logout")
+  .description("Clear stored credentials")
+  .action(logout);
+
+program
+  .command("whoami")
+  .description("Show the currently logged-in user")
+  .action(whoami);
+
+const configCommand = program
+  .command("config <subcommand> [args...]")
+  .description("Manage CLI configuration")
+  .action((sub: string, args: string[]) => configCmd(sub, args));
+configCommand.addHelpText(
+  "after",
+  "\nSubcommands:\n  list              Show current config\n  get <key>         Get a config value\n  set <key> <value> Set a config value (api-key, hub-url)\n  path              Print config file path",
+);
 
 program.parse();

@@ -4,6 +4,9 @@ import { Sandbox } from "microsandbox";
 import { buildSandbox, sandboxName, startAgent } from "../sandbox.js";
 import { installService } from "../service.js";
 import { findAvailablePort } from "../port.js";
+import { loadConfig } from "../config.js";
+import { generateName } from "../names.js";
+import { registerVivarium } from "../hub-client.js";
 
 async function ask(prompt: string): Promise<string> {
   const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -25,11 +28,8 @@ export async function start(opts: {
   memory: string;
   service: boolean;
 }): Promise<void> {
-  const name = opts.name ?? await ask("Vivarium name: ");
-  if (!name) {
-    console.error("Name is required.");
-    process.exit(1);
-  }
+  const config = loadConfig();
+  const name = opts.name ?? generateName();
 
   // Check if already exists
   try {
@@ -49,18 +49,43 @@ export async function start(opts: {
     // Doesn't exist — create it below
   }
 
-  const token = opts.token ?? await ask("Hub token: ");
+  // Resolve hub token: flag → config (auto-register) → interactive prompt
+  let token = opts.token;
+  let hubUrl = opts.hubUrl;
+
+  if (!token && config.userToken) {
+    const hubBase = config.hubUrl ?? "https://app.vivarium.run";
+    try {
+      console.log(`Registering "${name}" with hub...`);
+      const result = await registerVivarium(config.userToken, name, hubBase);
+      token = result.token;
+      hubUrl = result.hubUrl;
+    } catch (err) {
+      console.error(
+        err instanceof Error ? err.message : "Failed to register with hub.",
+      );
+      process.exit(1);
+    }
+  }
+
   if (!token) {
-    console.error("Token is required.");
+    token = await ask("Hub token: ");
+  }
+  if (!token) {
+    console.error("Token is required. Run `viv login` or pass --token.");
     process.exit(1);
   }
 
+  // Resolve API key: flag → env → config → interactive prompt
   const apiKey =
     opts.apiKey ??
     process.env.ANTHROPIC_API_KEY ??
-    await ask("Anthropic API key: ");
+    config.apiKey ??
+    (await ask("Anthropic API key: "));
   if (!apiKey) {
-    console.error("API key is required.");
+    console.error(
+      "API key is required. Set ANTHROPIC_API_KEY or run `viv config set api-key <key>`.",
+    );
     process.exit(1);
   }
 
@@ -72,7 +97,7 @@ export async function start(opts: {
     name,
     image: opts.image,
     apiKey,
-    hubUrl: opts.hubUrl,
+    hubUrl,
     token,
     port,
     cpus: parseInt(opts.cpus, 10),
