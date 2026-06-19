@@ -8,12 +8,12 @@ import { logs } from "./commands/logs.js";
 import { shell } from "./commands/shell.js";
 import { status } from "./commands/status.js";
 import { upgrade } from "./commands/upgrade.js";
+import { reimage } from "./commands/reimage.js";
 import { remove } from "./commands/remove.js";
 import { login } from "./commands/login.js";
 import { logout } from "./commands/logout.js";
 import { whoami } from "./commands/whoami.js";
 import { configCmd } from "./commands/config.js";
-import { selfUpdate } from "./commands/self-update.js";
 
 program
   .name("viv")
@@ -62,10 +62,10 @@ program
   .action(status);
 
 program
-  .command("upgrade [name]")
-  .description("Pull latest image and recreate sandbox")
+  .command("reimage [name]")
+  .description("Pull latest agent image and recreate sandbox")
   .option("--image <image>", "OCI image", "ghcr.io/assaf-benjosef/vivarium:latest")
-  .action(upgrade);
+  .action(reimage);
 
 program
   .command("remove [name]")
@@ -100,8 +100,8 @@ configCommand.addHelpText(
 );
 
 program
-  .command("update")
-  .description("Update the viv CLI to the latest version")
-  .action(selfUpdate);
+  .command("upgrade")
+  .description("Upgrade the viv CLI to the latest version")
+  .action(upgrade);
 
 program.parse();
