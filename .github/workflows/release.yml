@@ -45,7 +45,7 @@ jobs:
         run: git push origin main --follow-tags
 
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: npm publish --access public
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
